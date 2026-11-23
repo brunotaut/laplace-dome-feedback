@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Laplace Dome Demo Feedback | OSY Fly</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #171d22;
+  --muted: #4b5962;
+  --edge: #d5dcd9;
+  --paper: #fff;
+  --off: #f2f4f1;
+  --navy: #18242a;
+  --lime: #dcf75b;
+  --picked: #edf7d5;
+  --focus: #526b11;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--off);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+a.skip { position: absolute; top: -10rem; left: 1rem; padding: .6rem; background: var(--paper); }
+a.skip:focus { top: 1rem; z-index: 2; }
+.mast { background: var(--navy); color: var(--paper); }
+.mast-inner, main, footer { width: min(940px, calc(100% - 48px)); margin-inline: auto; }
+.mast-inner { padding: 26px 0 28px; }
+.topline { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.wordmark { font-size: 1rem; font-weight: 800; letter-spacing: .17em; color: var(--lime); }
+.duration { color: #d5e0db; font-size: .9rem; }
+h1 { font-size: clamp(1.9rem, 4.7vw, 3rem); font-weight: 650; letter-spacing: -.04em; line-height: 1.06; margin: 17px 0 10px; }
+.mast p { color: #dce5e1; line-height: 1.5; max-width: 68ch; margin: 0; }
+main { margin-top: 24px; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); list-style: none; padding: 0; margin: 0 0 19px; gap: 7px; }
+.steps li { border-top: 4px solid #c9d1cc; padding-top: 8px; font-size: .82rem; font-weight: 650; color: var(--muted); }
+.steps li.done { border-color: #a2b989; }
+.steps li[aria-current] { border-color: #53701b; color: var(--ink); }
+.panel { background: var(--paper); border: 1px solid var(--edge); border-radius: 15px; padding: clamp(18px, 4.1vw, 35px); }
+h2 { font-size: clamp(1.55rem, 3.4vw, 2.15rem); margin: 0 0 7px; line-height: 1.14; letter-spacing: -.035em; }
+h2:focus { outline: none; }
+.section-note { color: var(--muted); margin: 0 0 7px; line-height: 1.45; }
+fieldset, .open { min-width: 0; border: 0; border-top: 1px solid var(--edge); margin: 13px 0 0; padding: 13px 0 0; }
+legend { display: block; float: left; width: 100%; font-weight: 650; padding: 0; margin: 0 0 8px; line-height: 1.4; }
+legend + * { clear: both; }
+.question { font-weight: 650; display: block; margin-bottom: 8px; }
+.options { display: flex; gap: 7px; flex-wrap: wrap; }
+.option { position: relative; cursor: pointer; }
+.option input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.option span {
+  display: flex; justify-content: center; align-items: center; text-align: center;
+  min-height: 44px; padding: 7px 12px; font-size: .91rem; line-height: 1.25;
+  background: var(--paper); border: 1px solid var(--edge); border-radius: 7px;
+}
+.option input:checked + span { background: var(--picked); border-color: var(--focus); box-shadow: inset 0 0 0 1px var(--focus); color: #203603; font-weight: 650; }
+.option input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+.scale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; max-width: 570px; }
+.scale .option span { padding-inline: 0; font-variant-numeric: tabular-nums; }
+.scale-labels { display: flex; max-width: 570px; justify-content: space-between; gap: 6px; align-items: center; margin-top: 5px; color: var(--muted); font-size: .8rem; }
+.scale-labels .option span { min-height: 44px; padding: 4px 8px; background: transparent; font-size: .8rem; }
+.scale-labels .option input:checked + span { background: var(--picked); }
+.scale-labels .upper { text-align: right; }
+textarea, .password, .other input, .contact-fields input {
+  width: 100%; padding: 10px 12px; border: 1px solid #a8b6ad; border-radius: 7px; background: var(--paper); color: var(--ink);
+}
+textarea { min-height: 70px; resize: vertical; }
+.other { margin-top: 9px; max-width: 570px; }
+.other label { display: block; margin-bottom: 5px; font-size: .9rem; }
+.other input, .contact-fields input { min-height: 44px; }
+.contact-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.contact-fields label { display: grid; gap: 5px; font-size: .9rem; }
+.hint { display: block; margin-top: 6px; color: var(--muted); font-size: .85rem; line-height: 1.4; }
+.actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 20px; }
+.primary, .secondary {
+  border-radius: 8px; min-height: 46px; padding: 9px 16px; font-weight: 690;
+  border: 1px solid var(--edge); color: var(--ink); background: var(--paper);
+}
+.primary { background: var(--lime); border-color: #aac131; }
+button:disabled { cursor: wait; opacity: .65; }
+.right { margin-left: auto; }
+footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .85rem; padding: 14px 0 20px; }
+.quiet { background: none; border: 0; color: inherit; padding: 6px; min-height: 44px; text-decoration: underline; text-underline-offset: .19em; }
+.error { margin: 12px 0 0; color: #9b312a; line-height: 1.4; }
+dialog {
+  width: min(490px, calc(100% - 28px)); border: 1px solid var(--edge);
+  border-radius: 14px; padding: 24px; color: var(--ink); background: var(--paper);
+}
+dialog::backdrop { background: rgba(20, 31, 36, .68); }
+dialog p { color: var(--muted); line-height: 1.5; }
+dialog p.error { color: #9b312a; }
+dialog label { display: block; margin: 0 0 8px; font-weight: 650; }
+dialog .actions { flex-wrap: wrap; }
+.status { margin: 12px 0 0; line-height: 1.4; color: var(--muted); }
+[hidden] { display: none !important; }
+@media (max-width: 480px) {
+  .mast-inner, main, footer { width: calc(100% - 24px); }
+  .mast-inner { padding: 18px 0 21px; }
+  main { margin-top: 17px; }
+  .panel { padding: 15px; }
+  .steps li { font-size: .77rem; }
+  .option span { font-size: .86rem; padding-inline: 8px; }
+  .scale { gap: 2px; }
+  .contact-fields { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to form</a>
+<header class="mast">
+  <div class="mast-inner">
+    <div class="topline"><span class="wordmark">OSY FLY</span><span class="duration">About 3 minutes</span></div>
+    <h1>Laplace Dome demo feedback</h1>
+    <p>For internal review by OSY Fly. You can skip any question. Please leave out sensitive information.</p>
+  </div>
+</header>
+<main id="content">
+  <ol class="steps" id="steps" aria-label="Form progress"></ol>
+  <form class="panel" id="survey" aria-labelledby="section-title">
+    <h2 id="section-title" tabindex="-1"></h2>
+    <p class="section-note" id="section-note"></p>
+    <div id="questions"></div>
+    <input id="website" type="text" tabindex="-1" autocomplete="off" hidden aria-hidden="true">
+    <p id="error" class="error" role="alert" hidden></p>
+    <div class="actions">
+      <button type="button" class="secondary" id="back">Back</button>
+      <button type="submit" class="primary right" id="next">Continue</button>
+    </div>
+  </form>
+  <section class="panel" id="complete" aria-labelledby="thanks" hidden>
+    <h2 id="thanks" tabindex="-1">Thank you for your feedback</h2>
+    <p class="section-note" id="receipt"></p>
+    <div class="actions"><button type="button" class="primary" id="restart">Next respondent</button></div>
+  </section>
+</main>
+
+<script>
+'use strict';
+const reply = ['Yes', 'Partly', 'No', 'Unsure'];
+const other = 'Other';
+const sections = [
+  {
+    tab: 'Overall', title: 'Your overall impression', note: 'Think about what you saw today.',
+    questions: [
+      { id: 'expectations', type: 'scale', label: 'How well did the demo meet your expectations?', low: 'Fell short', high: 'Fully met', skip: 'No prior expectations' },
+      { id: 'system_clarity', type: 'scale', label: 'How clear was what Laplace Dome does?', low: 'Unclear', high: 'Very clear' },
+      { id: 'demo_scope', label: 'Could you tell what was demonstrated live and what was only described?', options: reply },
+      { id: 'standout', label: 'Which part made the strongest impression?', options: ['Detection', 'Control centre', 'Drone-following demo', 'How the components worked together', other, 'None in particular'] },
+      { id: 'least_convincing', label: 'Which part was least convincing?', options: ['Detection', 'Control centre', 'Drone-following demo', 'How the components worked together', other, 'None in particular', 'Too early to say'] }
+    ]
+  },
+  {
+    tab: 'Components', title: 'What you saw', note: 'Choose “Not observed” if you missed a part of the demo.',
+    questions: [
+      { id: 'detection_clarity', type: 'scale', label: 'Detection. How easy was it to tell when the system first detected a drone?', low: 'Very difficult', high: 'Very easy', skip: 'Not observed' },
+      { id: 'detection_expected', label: 'Did the detection view show the information you expected to see?', options: ['Yes', 'Partly', 'No', 'No prior expectations', 'Not observed'] },
+      { id: 'control_clarity', type: 'scale', label: 'Control centre. How easy was it to understand what was happening on screen?', low: 'Very difficult', high: 'Very easy', skip: 'Not observed' },
+      { id: 'following_clarity', type: 'scale', label: 'Drone-following demo. How clear was the sequence you watched?', low: 'Unclear', high: 'Very clear', skip: 'Not observed' },
+      { id: 'interface_improvement', label: 'What would most improve your understanding in a future demo?', options: ['Clearer detection alerts', 'Clearer map and track labels', 'Clearer system status', 'More operator explanation', 'A recap of the full sequence', other, 'Nothing to add'] }
+    ]
+  },
+  {
+    tab: 'Priorities', title: 'Priorities and timing', note: 'Broad answers are enough. Share only what you are comfortable disclosing.',
+    questions: [
+      { id: 'priorities', type: 'multi', label: 'What would you most like to see covered in a follow-up? Choose up to two.', options: ['Live airspace monitoring', 'Alert review and reporting', 'Control centre walkthrough', 'Integration overview', 'Operator onboarding', 'Rollout and support', 'Internal evaluation materials', other] },
+      { id: 'stage', label: 'What stage has your organisation reached in evaluating or procuring a system in this area?', options: ['No active project', 'Exploring options', 'Defining requirements', 'Evaluating options or planning a pilot', 'Formal procurement underway', 'A system is already in use', other, 'Unsure', 'Prefer not to say'] },
+      { id: 'horizon', label: 'When do you expect your organisation’s next evaluation or planning milestone in this area?', options: ['Within 3 months', 'In 4–6 months', 'In 7–12 months', 'More than 12 months away', 'No milestone planned', 'Unsure', 'Prefer not to say'], dependsOn: 'stage', when: answers => Boolean(answers.stage) && !['No active project', 'Unsure', 'Prefer not to say'].includes(answers.stage) },
+      { id: 'next_step', label: 'Would a follow-up discussion or demo be useful?', options: ['Yes', 'Possibly', 'No', 'Too early to say'] }
+    ]
+  },
+  {
+    tab: 'Your perspective', title: 'Your perspective', note: 'General categories help us understand the feedback. You can leave any answer blank.',
+    questions: [
+      { id: 'organisation', label: 'What type of organisation do you represent?', options: ['Police or law enforcement', 'Defence or armed forces', 'Other government or public body', 'Systems integrator', 'Private security provider', 'Infrastructure operator', other, 'Prefer not to say'] },
+      { id: 'role', label: 'What role do you usually play in decisions on systems like this?', options: ['Final approver', 'Formal decision-making role', 'Evaluate or recommend', 'Operate or use', 'Advise or support', other, 'No direct role', 'Prefer not to say'] },
+      { id: 'committee', label: 'Do you sit on a committee or working group that assesses or approves these systems?', options: ['Yes', 'No', 'Not applicable', 'Prefer not to say'] },
+      { id: 'alternatives', label: 'Has your organisation considered other systems in this area?', options: ['Yes', 'No', 'Unsure', 'Prefer not to say'] },
+      { id: 'other_demo', label: 'Have you personally seen another live demo of a comparable system?', options: ['Yes', 'No', 'Prefer not to say'] },
+      { id: 'comparison', type: 'scale', label: 'How did this demo compare with the others you have seen?', low: 'Much weaker', midpoint: 'About the same', high: 'Much stronger', skip: 'Hard to compare', dependsOn: 'other_demo', when: answers => answers.other_demo === 'Yes' },
+      { id: 'comment', type: 'text', label: 'What were you hoping to see today that you would like us to show or explain more clearly next time?' }
+    ]
+  }
+];
+const $ = id => document.getElementById(id);
+const allQuestions = sections.flatMap(section => section.questions);
+const otherQuestions = allQuestions.filter(question => question.options?.includes(other));
+const contactFields = [
+  { id: 'contact_name', label: 'Name', type: 'text', maxLength: 128 },
+  { id: 'contact_email', label: 'Email', type: 'email', maxLength: 254 },
+  { id: 'contact_phone', label: 'Phone', type: 'tel', maxLength: 64 }
+];
+let page = 0;
+let answers = {};
+let submissionId = null;
+
+
+function el(tag, text) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function choseOther(answer) {
+  return Array.isArray(answer) ? answer.includes(other) : answer === other;
+}
+
+function syncOtherField(question) {
+  const id = question.id + '_other';
+  const input = $(id);
+  if (!input) return;
+  const show = choseOther(answers[question.id]);
+  input.parentElement.hidden = !show;
+  input.disabled = !show;
+  if (!show) {
+    delete answers[id];
+    input.value = '';
+  }
+}
+
+function option(question, value, type = 'radio', accessibleLabel) {
+  const label = el('label');
+  label.className = 'option';
+  const input = el('input');
+  input.type = type;
+  input.name = question.id;
+  input.value = value;
+  input.autocomplete = 'off';
+  if (accessibleLabel) input.setAttribute('aria-label', accessibleLabel);
+  const answer = answers[question.id];
+  input.checked = type === 'checkbox' ? (answer ?? []).includes(value) : answer === value;
+  input.addEventListener('change', () => {
+    if (type === 'checkbox') {
+      const values = [...label.parentElement.querySelectorAll('input:checked')].map(checked => checked.value);
+      if (values.length > 2) {
+        input.checked = false;
+        $('priority-limit').textContent = 'Choose up to two. Clear a selection to pick another.';
+        return;
+      }
+      $('priority-limit').textContent = '';
+      answers[question.id] = values;
+      syncOtherField(question);
+      return;
+    }
+    answers[question.id] = value;
+    syncOtherField(question);
+    for (const dependent of allQuestions.filter(item => item.dependsOn === question.id)) {
+      const field = $(dependent.id + '-question');
+      field.hidden = !dependent.when(answers);
+      if (field.hidden) {
+        delete answers[dependent.id];
+        for (const control of field.querySelectorAll('input')) control.checked = false;
+      }
+    }
+  });
+  label.append(input, el('span', value));
+  return label;
+}
+
+function renderQuestion(question) {
+  if (question.type === 'text') {
+    const wrap = el('div');
+    wrap.className = 'open';
+    const label = el('label', question.label);
+    label.className = 'question';
+    label.htmlFor = question.id;
+    const area = el('textarea');
+    area.id = question.id;
+    area.maxLength = 400;
+    area.value = answers[question.id] ?? '';
+    area.setAttribute('aria-describedby', 'comment-hint');
+    area.addEventListener('input', () => { answers[question.id] = area.value; });
+    const hint = el('small', 'Optional. A short note is enough. Please leave out identifying or sensitive details.');
+    hint.className = 'hint';
+    hint.id = 'comment-hint';
+    wrap.append(label, area, hint);
+    return wrap;
+  }
+  const field = el('fieldset');
+  if (question.when) {
+    field.id = question.id + '-question';
+    field.hidden = !question.when(answers);
+  }
+  field.append(el('legend', question.label));
+  const options = el('div');
+  options.className = question.type === 'scale' ? 'scale' : 'options';
+  field.append(options);
+  if (question.type === 'scale') {
+    const labels = el('div');
+    labels.className = 'scale-labels';
+    for (let number = 1; number <= 10; number++) {
+      const explanation = number === 1 ? question.low : number === 10 ? question.high : '';
+      options.append(option(question, String(number), 'radio', explanation ? number + ', ' + explanation : String(number)));
+    }
+    labels.append(el('span', '1 ' + question.low));
+    if (question.skip) labels.append(option(question, question.skip));
+    const upper = el('span', '10 ' + question.high);
+    upper.className = 'upper';
+    labels.append(upper);
+    field.append(labels);
+    if (question.midpoint) {
+      const hint = el('small', '5–6 ' + question.midpoint);
+      hint.className = 'hint';
+      field.append(hint);
+    }
+    return field;
+  }
+  const multi = question.type === 'multi';
+  for (const value of question.options) options.append(option(question, value, multi ? 'checkbox' : 'radio'));
+  if (multi) {
+    const limit = el('small');
+    limit.id = 'priority-limit';
+    limit.className = 'hint';
+    limit.setAttribute('role', 'status');
+    field.append(limit);
+  }
+  if (question.options.includes(other)) {
+    const wrap = el('div');
+    wrap.className = 'other';
+    wrap.hidden = !choseOther(answers[question.id]);
+    const input = el('input');
+    input.id = question.id + '_other';
+    input.type = 'text';
+    input.autocomplete = 'off';
+    input.maxLength = 160;
+    input.disabled = wrap.hidden;
+    input.value = answers[input.id] ?? '';
+    input.addEventListener('input', () => { answers[input.id] = input.value; });
+    const label = el('label', 'Please specify (optional)');
+    label.htmlFor = input.id;
+    wrap.append(label, input);
+    field.append(wrap);
+  }
+  return field;
+}
+
+function renderContacts() {
+  const fieldset = el('fieldset');
+  const note = el('p', 'Share any details you’re comfortable providing if you’d like OSY Fly to follow up about the demo.');
+  note.className = 'section-note';
+  note.id = 'contact-note';
+  fieldset.setAttribute('aria-describedby', note.id);
+  const fields = el('div');
+  fields.className = 'contact-fields';
+  for (const field of contactFields) {
+    const label = el('label', field.label);
+    const input = el('input');
+    input.id = field.id;
+    input.type = field.type;
+    input.maxLength = field.maxLength;
+    input.autocomplete = 'off';
+    input.value = answers[field.id] ?? '';
+    input.addEventListener('input', () => { answers[field.id] = input.value; });
+    label.append(input);
+    fields.append(label);
+  }
+  fieldset.append(el('legend', 'Contact details (optional)'), note, fields);
+  return fieldset;
+}
+
+function render(moveFocus = true) {
+  const section = sections[page];
+  $('steps').replaceChildren(...sections.map((item, index) => {
+    const step = el('li', item.tab);
+    if (index < page) step.className = 'done';
+    if (index === page) step.setAttribute('aria-current', 'step');
+    return step;
+  }));
+  $('section-title').textContent = section.title;
+  $('section-note').textContent = section.note;
+  $('questions').replaceChildren(...section.questions.map(renderQuestion));
+  if (page === sections.length - 1) $('questions').append(renderContacts());
+  $('back').hidden = page === 0;
+  $('next').textContent = page === sections.length - 1 ? 'Submit feedback' : 'Continue';
+  showError('error', '');
+  if (moveFocus) {
+    $('section-title').focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }
+}
+
+function showError(id, message) {
+  $(id).textContent = message;
+  $(id).hidden = !message;
+}
+
+$('survey').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (page < sections.length - 1) {
+    page++;
+    render();
+    return;
+  }
+  const response = {};
+  for (const question of allQuestions) {
+    if (question.when && !question.when(answers)) continue;
+    const answer = answers[question.id];
+    if (typeof answer === 'string' && answer.trim()) response[question.id] = answer.trim();
+    if (Array.isArray(answer) && answer.length) response[question.id] = answer;
+    const otherId = question.id + '_other';
+    if (choseOther(answer) && answers[otherId]?.trim()) response[otherId] = answers[otherId].trim();
+  }
+  if (!Object.keys(response).length) {
+    showError('error', 'Add at least one answer before submitting.');
+    return;
+  }
+  for (const field of contactFields) {
+    const value = answers[field.id]?.trim();
+    if (value) response[field.id] = value;
+  }
+  $('next').disabled = true;
+  $('back').disabled = true;
+  try {
+    submissionId ??= crypto.randomUUID();
+    const result = await fetch('https://laplace-feedback-receiver.brunotaut.chatgpt.site/api/responses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ submissionId, website: $('website').value, answers: response }),
+      signal: AbortSignal.timeout(20000)
+    });
+    if (!result.ok || (await result.json()).ok !== true) throw new Error('Save not confirmed');
+    $('website').value = '';
+    answers = {};
+    submissionId = null;
+    $('questions').replaceChildren();
+    $('survey').hidden = true;
+    $('steps').hidden = true;
+    $('complete').hidden = false;
+    $('receipt').textContent = 'Your response has been saved.';
+    $('thanks').focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  } catch {
+    showError('error', 'We couldn’t confirm that your response was saved. Your answers are still here. Please try submitting again.');
+  } finally {
+    $('next').disabled = false;
+    $('back').disabled = false;
+  }
+});
+
+$('back').addEventListener('click', () => { page--; render(); });
+$('restart').addEventListener('click', () => {
+  page = 0;
+  $('complete').hidden = true;
+  $('steps').hidden = false;
+  $('survey').hidden = false;
+  render();
+});
+render(false);
+</script>
+</body>
+</html>
