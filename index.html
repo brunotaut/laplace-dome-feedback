@@ -37,6 +37,14 @@ a.skip:focus { top: 1rem; z-index: 2; }
 .topline { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
 .wordmark { font-size: 1rem; font-weight: 800; letter-spacing: .17em; color: var(--lime); }
 .duration { color: #d5e0db; font-size: .9rem; }
+.mast-controls { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px 14px; }
+.languages { display: flex; gap: 3px; padding: 3px; border: 1px solid #697b79; border-radius: 9px; }
+.languages a {
+  display: flex; align-items: center; min-height: 44px; padding-inline: 10px;
+  color: var(--paper); text-decoration: none; font-size: .85rem; font-weight: 650; border-radius: 5px;
+}
+.languages a[aria-current] { background: var(--lime); color: var(--ink); }
+.languages a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
 h1 { font-size: clamp(1.9rem, 4.7vw, 3rem); font-weight: 650; letter-spacing: -.04em; line-height: 1.06; margin: 17px 0 10px; }
 .mast p { color: #dce5e1; line-height: 1.5; max-width: 68ch; margin: 0; }
 main { margin-top: 24px; }
@@ -113,12 +121,21 @@ dialog .actions { flex-wrap: wrap; }
 </style>
 </head>
 <body>
-<a class="skip" href="#content">Skip to form</a>
+<a class="skip" id="skip" href="#content">Skip to form</a>
 <header class="mast">
   <div class="mast-inner">
-    <div class="topline"><span class="wordmark">OSY FLY</span><span class="duration">About 3 minutes</span></div>
-    <h1>Laplace Dome demo feedback</h1>
-    <p>For internal review by OSY Fly. You can skip any question. Please leave out sensitive information.</p>
+    <div class="topline">
+      <span class="wordmark">OSY FLY</span>
+      <div class="mast-controls">
+        <span class="duration" id="duration">About 3 minutes</span>
+        <nav class="languages" id="languages" aria-label="Language">
+          <a href="?lang=en" lang="en" hreflang="en" aria-current="true">English</a>
+          <a href="?lang=cs" lang="cs" hreflang="cs">Čeština</a>
+        </nav>
+      </div>
+    </div>
+    <h1 id="form-title">Laplace Dome demo feedback</h1>
+    <p id="form-intro">For internal review by OSY Fly. You can skip any question. Please leave out sensitive information.</p>
   </div>
 </header>
 <main id="content">
@@ -196,10 +213,156 @@ const contactFields = [
   { id: 'contact_email', label: 'Email', type: 'email', maxLength: 254 },
   { id: 'contact_phone', label: 'Phone', type: 'tel', maxLength: 64 }
 ];
+const czech = {
+  'Laplace Dome Demo Feedback | OSY Fly': 'Zpětná vazba k ukázce systému Laplace Dome | OSY Fly',
+  'Laplace Dome demo feedback': 'Zpětná vazba k ukázce systému Laplace Dome',
+  'For internal review by OSY Fly. You can skip any question. Please leave out sensitive information.': 'Pro interní potřebu společnosti OSY Fly. Kteroukoli otázku můžete přeskočit. Citlivé informace prosím neuvádějte.',
+  'Skip to form': 'Přejít na formulář',
+  'About 3 minutes': 'Přibližně 3 minuty',
+  'Language': 'Jazyk',
+  'Form progress': 'Průběh vyplňování',
+  'Back': 'Zpět',
+  'Continue': 'Pokračovat',
+  'Submit feedback': 'Odeslat zpětnou vazbu',
+  'Thank you for your feedback': 'Děkujeme za zpětnou vazbu',
+  'Your response has been saved.': 'Vaše odpovědi byly uloženy.',
+  'Next respondent': 'Další účastník',
+  'Choose up to two. Clear a selection to pick another.': 'Vyberte nejvýše dvě možnosti. Chcete-li vybrat jinou, nejprve zrušte jednu z vybraných.',
+  'Optional. A short note is enough. Please leave out identifying or sensitive details.': 'Nepovinné pole. Stačí krátká poznámka. Prosím neuvádějte údaje, podle kterých lze někoho identifikovat, ani citlivé informace.',
+  'Please specify (optional)': 'Upřesněte (nepovinné)',
+  'Contact details (optional)': 'Kontaktní údaje (nepovinné)',
+  'Share any details you’re comfortable providing if you’d like OSY Fly to follow up about the demo.': 'Pokud si přejete, aby vás OSY Fly ohledně ukázky kontaktovala, můžete uvést své kontaktní údaje.',
+  'Name': 'Jméno',
+  'Email': 'E-mail',
+  'Phone': 'Telefon',
+  'Add at least one answer before submitting.': 'Před odesláním vyplňte alespoň jednu otázku.',
+  'We couldn’t confirm that your response was saved. Your answers are still here. Please try submitting again.': 'Uložení se nepodařilo ověřit. Vaše odpovědi jsou stále ve formuláři. Zkuste je prosím odeslat znovu.',
+  'Overall': 'Celkové hodnocení',
+  'Your overall impression': 'Celkový dojem',
+  'Think about what you saw today.': 'Vycházejte z toho, co jste dnes viděli.',
+  'Components': 'Části ukázky',
+  'What you saw': 'Jednotlivé části ukázky',
+  'Choose “Not observed” if you missed a part of the demo.': 'Pokud jste některou část ukázky neviděli, zvolte „Tuto část jsem neviděl/a“.',
+  'Priorities': 'Priority',
+  'Priorities and timing': 'Priority a časový plán',
+  'Broad answers are enough. Share only what you are comfortable disclosing.': 'Stačí obecné odpovědi. Uveďte pouze to, co můžete a chcete sdílet.',
+  'Your perspective': 'Váš pohled',
+  'General categories help us understand the feedback. You can leave any answer blank.': 'Obecné údaje nám pomohou lépe porozumět vaší zpětné vazbě. Kteroukoli otázku můžete vynechat.',
+  'How well did the demo meet your expectations?': 'Do jaké míry ukázka splnila vaše očekávání?',
+  'How clear was what Laplace Dome does?': 'Jak srozumitelné bylo, k čemu systém Laplace Dome slouží?',
+  'Could you tell what was demonstrated live and what was only described?': 'Bylo jasné, co jsme předvedli živě a co jsme pouze popsali?',
+  'Which part made the strongest impression?': 'Která část na vás udělala nejsilnější dojem?',
+  'Which part was least convincing?': 'Která část byla nejméně přesvědčivá?',
+  'Detection. How easy was it to tell when the system first detected a drone?': 'Detekce. Jak snadné bylo poznat, kdy systém poprvé zaznamenal dron?',
+  'Did the detection view show the information you expected to see?': 'Zobrazovala obrazovka detekce informace, které jste očekávali?',
+  'Control centre. How easy was it to understand what was happening on screen?': 'Řídicí centrum. Jak snadné bylo porozumět tomu, co se dělo na obrazovce?',
+  'Drone-following demo. How clear was the sequence you watched?': 'Ukázka sledování dronu. Jak srozumitelný byl průběh této části ukázky?',
+  'What would most improve your understanding in a future demo?': 'Co by vám při příští ukázce nejvíce pomohlo lépe porozumět systému?',
+  'What would you most like to see covered in a follow-up? Choose up to two.': 'Čemu byste se při další ukázce nebo schůzce chtěli nejvíce věnovat? Vyberte nejvýše dvě možnosti.',
+  'What stage has your organisation reached in evaluating or procuring a system in this area?': 'V jaké fázi je hodnocení nebo pořizování systému tohoto typu ve vaší organizaci?',
+  'When do you expect your organisation’s next evaluation or planning milestone in this area?': 'Kdy vaše organizace očekává další důležitý krok v hodnocení nebo plánování v této oblasti?',
+  'Would a follow-up discussion or demo be useful?': 'Byla by pro vás užitečná další schůzka nebo ukázka?',
+  'What type of organisation do you represent?': 'Jaký typ organizace zastupujete?',
+  'What role do you usually play in decisions on systems like this?': 'Jakou roli obvykle zastáváte při rozhodování o systémech tohoto typu?',
+  'Do you sit on a committee or working group that assesses or approves these systems?': 'Jste členem komise nebo pracovní skupiny, která tyto systémy posuzuje nebo schvaluje?',
+  'Has your organisation considered other systems in this area?': 'Zvažovala vaše organizace jiné systémy v této oblasti?',
+  'Have you personally seen another live demo of a comparable system?': 'Viděli jste osobně jinou živou ukázku srovnatelného systému?',
+  'How did this demo compare with the others you have seen?': 'Jak si tato ukázka vedla ve srovnání s ostatními, které jste viděli?',
+  'What were you hoping to see today that you would like us to show or explain more clearly next time?': 'Co jste dnes chtěli vidět a co bychom podle vás měli příště lépe ukázat nebo vysvětlit?',
+  'Fell short': 'Nesplnila očekávání',
+  'Fully met': 'Zcela splnila očekávání',
+  'No prior expectations': 'Bez předchozích očekávání',
+  'Unclear': 'Nesrozumitelné',
+  'Very clear': 'Velmi srozumitelné',
+  'Yes': 'Ano',
+  'Partly': 'Částečně',
+  'No': 'Ne',
+  'Unsure': 'Nevím',
+  'Detection': 'Detekce',
+  'Control centre': 'Řídicí centrum',
+  'Drone-following demo': 'Ukázka sledování dronu',
+  'How the components worked together': 'Součinnost jednotlivých částí systému',
+  'Other': 'Jiné',
+  'None in particular': 'Žádná konkrétní část',
+  'Too early to say': 'Zatím je brzy na odpověď',
+  'Very difficult': 'Velmi obtížné',
+  'Very easy': 'Velmi snadné',
+  'Not observed': 'Tuto část jsem neviděl/a',
+  'Clearer detection alerts': 'Srozumitelnější upozornění na detekci',
+  'Clearer map and track labels': 'Přehlednější označení na mapě a u sledovaných objektů',
+  'Clearer system status': 'Přehlednější údaje o stavu systému',
+  'More operator explanation': 'Podrobnější komentář obsluhy',
+  'A recap of the full sequence': 'Shrnutí celého průběhu ukázky',
+  'Nothing to add': 'Bez připomínek',
+  'Live airspace monitoring': 'Sledování vzdušného prostoru v reálném čase',
+  'Alert review and reporting': 'Přehled upozornění a tvorba hlášení',
+  'Control centre walkthrough': 'Prohlídka řídicího centra',
+  'Integration overview': 'Přehled možností integrace',
+  'Operator onboarding': 'Zaškolení obsluhy',
+  'Rollout and support': 'Nasazení a podpora',
+  'Internal evaluation materials': 'Podklady pro interní hodnocení',
+  'No active project': 'Žádný probíhající projekt',
+  'Exploring options': 'Zjišťujeme dostupné možnosti',
+  'Defining requirements': 'Stanovujeme požadavky',
+  'Evaluating options or planning a pilot': 'Hodnotíme možnosti nebo plánujeme pilotní projekt',
+  'Formal procurement underway': 'Probíhá formální zadávací řízení',
+  'A system is already in use': 'Systém už používáme',
+  'Prefer not to say': 'Nechci uvádět',
+  'Within 3 months': 'Do 3 měsíců',
+  'In 4–6 months': 'Za 4–6 měsíců',
+  'In 7–12 months': 'Za 7–12 měsíců',
+  'More than 12 months away': 'Za více než 12 měsíců',
+  'No milestone planned': 'Žádný další krok není naplánován',
+  'Possibly': 'Možná',
+  'Police or law enforcement': 'Policie nebo jiný bezpečnostní sbor',
+  'Defence or armed forces': 'Obrana nebo ozbrojené síly',
+  'Other government or public body': 'Jiný orgán státní správy nebo veřejná instituce',
+  'Systems integrator': 'Systémový integrátor',
+  'Private security provider': 'Soukromý poskytovatel bezpečnostních služeb',
+  'Infrastructure operator': 'Provozovatel infrastruktury',
+  'Final approver': 'Mám konečné slovo při schvalování',
+  'Formal decision-making role': 'Formálně se podílím na rozhodování',
+  'Evaluate or recommend': 'Hodnotím nebo doporučuji řešení',
+  'Operate or use': 'Systém obsluhuji nebo používám',
+  'Advise or support': 'Poskytuji poradenství nebo podporu',
+  'No direct role': 'Nemám přímou roli',
+  'Not applicable': 'Netýká se mě',
+  'Much weaker': 'Výrazně slabší',
+  'About the same': 'Přibližně stejná',
+  'Much stronger': 'Výrazně lepší',
+  'Hard to compare': 'Těžko srovnatelné'
+};
+const staticText = {
+  skip: 'Skip to form',
+  duration: 'About 3 minutes',
+  'form-title': 'Laplace Dome demo feedback',
+  'form-intro': 'For internal review by OSY Fly. You can skip any question. Please leave out sensitive information.',
+  back: 'Back',
+  thanks: 'Thank you for your feedback',
+  receipt: 'Your response has been saved.',
+  restart: 'Next respondent'
+};
+let locale = new URLSearchParams(location.search).get('lang') === 'cs' ? 'cs' : 'en';
 let page = 0;
 let answers = {};
 let submissionId = null;
+let formError = '';
 
+function translate(text) {
+  return locale === 'cs' && Object.hasOwn(czech, text) ? czech[text] : text;
+}
+
+function renderLanguage() {
+  document.documentElement.lang = locale;
+  document.title = translate('Laplace Dome Demo Feedback | OSY Fly');
+  for (const [id, text] of Object.entries(staticText)) $(id).textContent = translate(text);
+  $('languages').setAttribute('aria-label', translate('Language'));
+  $('steps').setAttribute('aria-label', translate('Form progress'));
+  for (const link of $('languages').querySelectorAll('a')) {
+    if (link.lang === locale) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  }
+}
 
 function el(tag, text) {
   const node = document.createElement(tag);
@@ -240,7 +403,7 @@ function option(question, value, type = 'radio', accessibleLabel) {
       const values = [...label.parentElement.querySelectorAll('input:checked')].map(checked => checked.value);
       if (values.length > 2) {
         input.checked = false;
-        $('priority-limit').textContent = 'Choose up to two. Clear a selection to pick another.';
+        $('priority-limit').textContent = translate('Choose up to two. Clear a selection to pick another.');
         return;
       }
       $('priority-limit').textContent = '';
@@ -259,7 +422,7 @@ function option(question, value, type = 'radio', accessibleLabel) {
       }
     }
   });
-  label.append(input, el('span', value));
+  label.append(input, el('span', translate(value)));
   return label;
 }
 
@@ -267,7 +430,7 @@ function renderQuestion(question) {
   if (question.type === 'text') {
     const wrap = el('div');
     wrap.className = 'open';
-    const label = el('label', question.label);
+    const label = el('label', translate(question.label));
     label.className = 'question';
     label.htmlFor = question.id;
     const area = el('textarea');
@@ -276,7 +439,7 @@ function renderQuestion(question) {
     area.value = answers[question.id] ?? '';
     area.setAttribute('aria-describedby', 'comment-hint');
     area.addEventListener('input', () => { answers[question.id] = area.value; });
-    const hint = el('small', 'Optional. A short note is enough. Please leave out identifying or sensitive details.');
+    const hint = el('small', translate('Optional. A short note is enough. Please leave out identifying or sensitive details.'));
     hint.className = 'hint';
     hint.id = 'comment-hint';
     wrap.append(label, area, hint);
@@ -287,7 +450,7 @@ function renderQuestion(question) {
     field.id = question.id + '-question';
     field.hidden = !question.when(answers);
   }
-  field.append(el('legend', question.label));
+  field.append(el('legend', translate(question.label)));
   const options = el('div');
   options.className = question.type === 'scale' ? 'scale' : 'options';
   field.append(options);
@@ -296,16 +459,16 @@ function renderQuestion(question) {
     labels.className = 'scale-labels';
     for (let number = 1; number <= 10; number++) {
       const explanation = number === 1 ? question.low : number === 10 ? question.high : '';
-      options.append(option(question, String(number), 'radio', explanation ? number + ', ' + explanation : String(number)));
+      options.append(option(question, String(number), 'radio', explanation ? number + ', ' + translate(explanation) : String(number)));
     }
-    labels.append(el('span', '1 ' + question.low));
+    labels.append(el('span', '1 ' + translate(question.low)));
     if (question.skip) labels.append(option(question, question.skip));
-    const upper = el('span', '10 ' + question.high);
+    const upper = el('span', '10 ' + translate(question.high));
     upper.className = 'upper';
     labels.append(upper);
     field.append(labels);
     if (question.midpoint) {
-      const hint = el('small', '5–6 ' + question.midpoint);
+      const hint = el('small', '5–6 ' + translate(question.midpoint));
       hint.className = 'hint';
       field.append(hint);
     }
@@ -332,7 +495,7 @@ function renderQuestion(question) {
     input.disabled = wrap.hidden;
     input.value = answers[input.id] ?? '';
     input.addEventListener('input', () => { answers[input.id] = input.value; });
-    const label = el('label', 'Please specify (optional)');
+    const label = el('label', translate('Please specify (optional)'));
     label.htmlFor = input.id;
     wrap.append(label, input);
     field.append(wrap);
@@ -342,14 +505,14 @@ function renderQuestion(question) {
 
 function renderContacts() {
   const fieldset = el('fieldset');
-  const note = el('p', 'Share any details you’re comfortable providing if you’d like OSY Fly to follow up about the demo.');
+  const note = el('p', translate('Share any details you’re comfortable providing if you’d like OSY Fly to follow up about the demo.'));
   note.className = 'section-note';
   note.id = 'contact-note';
   fieldset.setAttribute('aria-describedby', note.id);
   const fields = el('div');
   fields.className = 'contact-fields';
   for (const field of contactFields) {
-    const label = el('label', field.label);
+    const label = el('label', translate(field.label));
     const input = el('input');
     input.id = field.id;
     input.type = field.type;
@@ -360,34 +523,35 @@ function renderContacts() {
     label.append(input);
     fields.append(label);
   }
-  fieldset.append(el('legend', 'Contact details (optional)'), note, fields);
+  fieldset.append(el('legend', translate('Contact details (optional)')), note, fields);
   return fieldset;
 }
 
-function render(moveFocus = true) {
+function render(moveFocus = true, clearError = true) {
   const section = sections[page];
   $('steps').replaceChildren(...sections.map((item, index) => {
-    const step = el('li', item.tab);
+    const step = el('li', translate(item.tab));
     if (index < page) step.className = 'done';
     if (index === page) step.setAttribute('aria-current', 'step');
     return step;
   }));
-  $('section-title').textContent = section.title;
-  $('section-note').textContent = section.note;
+  $('section-title').textContent = translate(section.title);
+  $('section-note').textContent = translate(section.note);
   $('questions').replaceChildren(...section.questions.map(renderQuestion));
   if (page === sections.length - 1) $('questions').append(renderContacts());
   $('back').hidden = page === 0;
-  $('next').textContent = page === sections.length - 1 ? 'Submit feedback' : 'Continue';
-  showError('error', '');
+  $('next').textContent = translate(page === sections.length - 1 ? 'Submit feedback' : 'Continue');
+  showError(clearError ? '' : formError);
   if (moveFocus) {
     $('section-title').focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }
 }
 
-function showError(id, message) {
-  $(id).textContent = message;
-  $(id).hidden = !message;
+function showError(message) {
+  formError = message;
+  $('error').textContent = translate(message);
+  $('error').hidden = !message;
 }
 
 $('survey').addEventListener('submit', async event => {
@@ -407,7 +571,7 @@ $('survey').addEventListener('submit', async event => {
     if (choseOther(answer) && answers[otherId]?.trim()) response[otherId] = answers[otherId].trim();
   }
   if (!Object.keys(response).length) {
-    showError('error', 'Add at least one answer before submitting.');
+    showError('Add at least one answer before submitting.');
     return;
   }
   for (const field of contactFields) {
@@ -432,11 +596,10 @@ $('survey').addEventListener('submit', async event => {
     $('survey').hidden = true;
     $('steps').hidden = true;
     $('complete').hidden = false;
-    $('receipt').textContent = 'Your response has been saved.';
     $('thanks').focus({ preventScroll: true });
     window.scrollTo(0, 0);
   } catch {
-    showError('error', 'We couldn’t confirm that your response was saved. Your answers are still here. Please try submitting again.');
+    showError('We couldn’t confirm that your response was saved. Your answers are still here. Please try submitting again.');
   } finally {
     $('next').disabled = false;
     $('back').disabled = false;
@@ -451,6 +614,19 @@ $('restart').addEventListener('click', () => {
   $('survey').hidden = false;
   render();
 });
+for (const link of $('languages').querySelectorAll('a')) {
+  link.addEventListener('click', event => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    locale = link.lang;
+    const url = new URL(location.href);
+    url.searchParams.set('lang', locale);
+    history.replaceState(null, '', url);
+    renderLanguage();
+    if (!$('survey').hidden) render(false, false);
+  });
+}
+renderLanguage();
 render(false);
 </script>
 </body>
